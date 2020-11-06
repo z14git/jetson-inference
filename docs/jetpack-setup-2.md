@@ -1,42 +1,53 @@
-<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/deep-vision-header.jpg">
-<p align="right"><sup><a href="../README.md#hello-ai-world-inference-only">Back</a> | <a href="building-repo-2.md">Next</a> | </sup><a href="../README.md#hello-ai-world-inference-only"><sup>Contents</sup></a>
+<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/deep-vision-header.jpg" width="100%">
+<p align="right"><sup><a href="../README.md#hello-ai-world">Back</a> | <a href="aux-docker.md">Next</a> | </sup><a href="../README.md#hello-ai-world"><sup>Contents</sup></a>
 <br/>
 <sup>System Setup</sup></p> 
 
 # Setting up Jetson with JetPack
 
-> **note**:  if your Jetson Nano has already been setup with the [SD card image](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write) (which includes the JetPack components), or your Jetson has already been setup with JetPack, you can skip this step and continue to [`Building the Repo`](building-repo-2.md)
+> **note**:  if your Jetson Nano or Xavier NX has already been setup with the [SD card image](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit#write) (which includes JetPack), or your Jetson has already been setup with JetPack, you can skip this step and continue to [`Running the Docker Container`](aux-docker.md) or [`Building the Project`](building-repo-2.md)
 
-Download the latest **[JetPack](https://developer.nvidia.com/embedded/jetpack)** to your host PC.  In addition to flashing the Jetson with the latest Board Support Package (BSP), JetPack automatically installs tools for the host like CUDA Toolkit.  See the JetPack [Release Notes](https://developer.nvidia.com/embedded/jetpack-notes) for the full list of features and installed packages.
+NVIDIA **[JetPack](https://developer.nvidia.com/embedded/jetpack)** is a comprehensive SDK for Jetson for both developing and deploying AI and computer vision applications.  JetPack simplifies installation of the OS and drivers and contains the following components:
 
-After downloading JetPack from the link above, run it from the host PC with the following commands:
+- L4T Kernel / BSP
+- CUDA Toolkit
+- cuDNN
+- TensorRT
+- OpenCV
+- VisionWorks
+- Multimedia API's
 
-``` bash 
-$ cd <directory where you downloaded JetPack>
-$ chmod +x JetPack-L4T-<version>-linux-x64.run 
-$ ./JetPack-L4T-<version>-linux-x64.run 
-```
+Before attempting to use the Docker container or build the repo, make sure that your Jetson has been setup with the latest version of JetPack.
 
-The JetPack GUI will start.  Follow the step-by-step **[Install Guide](http://docs.nvidia.com/jetpack-l4t/index.html#developertools/mobile/jetpack/l4t/3.0/jetpack_l4t_install.htm)** to complete the setup.  Near the beginning, JetPack will confirm which generation Jetson you are developing for.
+### Jetson Nano and Jetson Xavier NX
 
-<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/jetpack-platform.png" width="450">
+The recommended install method for the Jetson Nano Developer Kit and Jetson Xavier NX Developer Kit is to use the **[SD card images](https://developer.nvidia.com/embedded/downloads)**.  
 
-Select Jetson TX1 if you are using TX1, or Jetson TX2 if you're using TX2, and press `Next` to continue.
+It comes pre-populated with the JetPack components already installed and can be flashed from a Windows, Mac, or Linux PC.  If you haven't already, follow the Getting Started guide for your respective Jetson to flash the SD card image and setup your device:
 
-The next screen will list the packages available to be installed.  The packages installed to the host are listed at the top under the `Host - Ubuntu` dropdown, while those intended for the Jetson are shown near the bottom.  You can select or deselect an individual package for installation by clicking it's `Action` column.
+* [Getting Started with Jetson Nano Developer Kit](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-devkit)
+* [Getting Started with Jetson Nano 2GB Developer Kit](https://developer.nvidia.com/embedded/learn/get-started-jetson-nano-2gb-devkit)
+* [Jetson Xavier NX User Guide](https://developer.nvidia.com/embedded/downloads#?search=Jetson%20Xavier%20NX%20Developer%20Kit%20User%20Guide) 
 
-<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/jetpack-downloads.png" width="500">
+### Jetson TX1/TX2 and AGX Xavier
 
-Since CUDA will be used on the host for training DNNs, it's recommended to select the Full install by click on the radio button in the top right.  Then press `Next` to begin setup.  JetPack will download and then install the sequence of packages.  Note that all the .deb packages are stored under the `jetpack_downloads` subdirectory if you are to need them later.  
+Other Jetson's should be flashed by downloading the [NVIDIA SDK Manager](https://developer.nvidia.com/embedded/dlc/nv-sdk-manager) to a host PC running Ubuntu 16.04 x86_64 or Ubuntu 18.04 x86_64.  Connect the Micro-USB or USB-C port to your host PC and enter the device into Recovery Mode.
 
-After the downloads have finished installing, JetPack will enter the post-install phase where the JetPack is flashed with the L4T BSP.  You'll need to connect your Jetson to your host PC via the micro-USB port and cable included in the devkit.  Then enter your Jetson into recovery mode by holding down the Recovery button while pressing and releasing Reset.  If you type `lsusb` from the host PC after you've connected the micro-USB cable and entered the Jetson into recovery mode, you should see the NVIDIA device come up under the list of USB devices.  JetPack uses the micro-USB connection from the host to flash the L4T BSP to the Jetson.  
+<img src="https://github.com/dusty-nv/jetson-inference/raw/python/docs/images/nvsdkm.png" width="800">
 
-After flashing, the Jetson will reboot and if attached to an HDMI display, will boot up to the Ubuntu desktop.  After this, JetPack connects to the Jetson from the host via SSH to install additional packages to the Jetson, like the ARM aarch64 builds of CUDA Toolkit, cuDNN, and TensorRT.  For JetPack to be able to reach the Jetson via SSH, the host PC should be networked to the Jetson via Ethernet.  This can be accomplished by running an Ethernet cable directly from the host to the Jetson, or by connecting both devices to a router or switch — the JetPack GUI will ask you to confirm which networking scenario is being used.  
+For more details, please refer to the **[NVIDIA SDK Manager Documentation](https://docs.nvidia.com/sdk-manager/index.html)**.
 
-Please refer to the **[JetPack Install Guide](http://docs.nvidia.com/jetpack-l4t/index.html#developertools/mobile/jetpack/l4t/3.0/jetpack_l4t_install.htm)** for the full directions for installing JetPack and flashing Jetson.
+### Getting the Project
+
+There are two ways to use the jetson-inference project:   
+
+* Run the pre-built [Docker Container](aux-docker.md)
+* [Build the Project from Source](building-repo-2.md)
+
+Using the container is recommended initially to get up & running as fast as possible (and the container already includes PyTorch installed), however if you are more comfortable with native development then compiling the project yourself is not complicated either.
 
 ##
-<p align="right">Next | <b><a href="building-repo-2.md">Building the Repo from Source</a></b>
+<p align="right">Next | <b><a href="building-repo-2.md">Building the Project from Source</a></b>
 <br/>
-Back | <b><a href="../README.md#hello-ai-world-inference-only">Overview</a></p>
-</b><p align="center"><sup>© 2016-2019 NVIDIA | </sup><a href="../README.md#hello-ai-world-inference-only"><sup>Table of Contents</sup></a></p>
+Back | <b><a href="../README.md#hello-ai-world">Overview</a></p>
+</b><p align="center"><sup>© 2016-2019 NVIDIA | </sup><a href="../README.md#hello-ai-world"><sup>Table of Contents</sup></a></p>

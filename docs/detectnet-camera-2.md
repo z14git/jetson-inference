@@ -1,42 +1,65 @@
-<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/deep-vision-header.jpg">
-<p align="right"><sup><a href="detectnet-console-2.md">Back</a> | <a href="../README.md#hello-ai-world-inference-only">Next</a> | </sup><a href="../README.md#hello-ai-world-inference-only"><sup>Contents</sup></a>
+<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/deep-vision-header.jpg" width="100%">
+<p align="right"><sup><a href="detectnet-console-2.md">Back</a> | <a href="detectnet-example-2.md">Next</a> | </sup><a href="../README.md#hello-ai-world"><sup>Contents</sup></a>
 <br/>
 <sup>Object Detection</sup></p>
 
 # Running the Live Camera Detection Demo
 
-Similar to the previous example, [`detectnet-camera`](../detectnet-camera/detectnet-camera.cpp) runs the object detection networks on live video feed from the Jetson onboard camera.  Launch it from command line along with the type of desired network:
+The [`detectnet.cpp`](../examples/detectnet/detectnet.cpp) / [`detectnet.py`](../python/examples/detectnet.py) sample that we used previously can also be used for realtime camera streaming.  The types of supported cameras include:
+
+- MIPI CSI cameras (`csi://0`)
+- V4L2 cameras (`/dev/video0`)
+- RTP/RTSP streams (`rtsp://username:password@ip:port`)
+
+For more information about video streams and protocols, please see the [Camera Streaming and Multimedia](aux-streaming.md) page.
+
+Run the program with `--help` to see a full list of options - some of them specific to detectNet include:
+
+- `--network` flag which changes the [detection model](detectnet-console-2.md#pre-trained-detection-models-available) being used (the default is SSD-Mobilenet-v2).
+- `--overlay` flag which can be comma-separated combinations of `box`, `labels`, `conf`, and `none`
+	- The default is `--overlay=box,labels,conf` which displays boxes, labels, and confidence values
+- `--alpha` value which sets the alpha blending value used during overlay (the default is `120`).
+- `--threshold` value which sets the minimum threshold for detection (the default is `0.5`).
+
+Below are some typical scenarios for launching the program on a camera feed:
+
+#### C++
 
 ``` bash
-$ ./detectnet-camera facenet        # run using facial recognition network
-$ ./detectnet-camera multiped       # run using multi-class pedestrian/luggage detector
-$ ./detectnet-camera pednet         # run using original single-class pedestrian detector
-$ ./detectnet-camera coco-bottle    # detect bottles/soda cans in the camera
-$ ./detectnet-camera coco-dog       # detect dogs in the camera
-$ ./detectnet-camera                # by default, program will run using multiped
+$ ./detectnet csi://0                    # MIPI CSI camera
+$ ./detectnet /dev/video0                # V4L2 camera
+$ ./detectnet /dev/video0 output.mp4     # save to video file
 ```
 
-> **note**:  to achieve maximum performance while running detectnet, increase the Jetson clock limits by running the script:
->  `sudo ~/jetson_clocks.sh`
+#### Python
 
-<br/>
+``` bash
+$ ./detectnet.py csi://0                 # MIPI CSI camera
+$ ./detectnet.py /dev/video0             # V4L2 camera
+$ ./detectnet.py /dev/video0 output.mp4  # save to video file
+```
 
-> **note**:  by default, the Jetson's onboard CSI camera will be used as the video source.  If you wish to use a USB webcam instead, change the `DEFAULT_CAMERA` define at the top of [`detectnet-camera.cpp`](../detectnet-camera/detectnet-camera.cpp) to reflect the /dev/video V4L2 device of your USB camera and recompile.  The webcam model it's tested with is Logitech C920.  
-<br/>
+> **note**:  for example cameras to use, see these sections of the Jetson Wiki: <br/>
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Nano:&nbsp;&nbsp;[`https://eLinux.org/Jetson_Nano#Cameras`](https://elinux.org/Jetson_Nano#Cameras) <br/>
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- Xavier:  [`https://eLinux.org/Jetson_AGX_Xavier#Ecosystem_Products_.26_Cameras`](https://elinux.org/Jetson_AGX_Xavier#Ecosystem_Products_.26_Cameras) <br/>
+> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- TX1/TX2:  developer kits include an onboard MIPI CSI sensor module (0V5693)<br/>
 
-## What's Next
+#### Visualization
 
-This is the last step of the *Hello AI World* tutorial, which covers inferencing on Jetson with TensorRT.  
+Displayed in the OpenGL window are the live camera stream overlayed with the bounding boxes of the detected objects.  Note that the SSD-based models currently have the highest performance.  Here is one using the `coco-dog` model:
 
-To recap, together we've covered:
+<img src="https://github.com/dusty-nv/jetson-inference/raw/dev/docs/images/detectnet-ssd-animals.jpg" width="800">
 
-* Using image recognition networks to classify images
-* Coding your own image recognition program in C++
-* Classifying video from a live camera stream
-* Performing object detection to locate object coordinates
+<img src="https://github.com/dusty-nv/jetson-inference/raw/dev/docs/images/detectnet-ssd-kitchen.jpg" width="800">
 
-Next, we encourage you to follow our full **[Training + Inference](https://github.com/dusty-nv/jetson-inference#two-days-to-a-demo-training--inference)** tutorial, which also covers the re-training of these networks on custom datasets.  This way, you can collect your own data and have the models recognize objects specific to your applications.  The full tutorial also covers semantic segmentation, which is like image classification, but on a per-pixel level instead of predicting one class for the entire image.  Good luck!
+<img src="https://github.com/dusty-nv/jetson-inference/raw/dev/docs/images/detectnet-ssd-laptops.jpg" width="800">
+
+If the desired objects aren't being detected in the video feed or you're getting spurious detections, try decreasing or increasing the detection threshold with the `--threshold` parameter (the default is `0.5`).
+
+Next, we'll cover creating the code for a camera detection app in Python.
 
 ##
-<p align="right">Back | <b><a href="detectnet-console-2.md">Detecting Objects from the Command Line</a></p>
-</b><p align="center"><sup>© 2016-2019 NVIDIA | </sup><a href="../README.md#hello-ai-world-inference-only"><sup>Table of Contents</sup></a></p>
+<p align="right">Next | <b><a href="detectnet-example-2.md">Coding Your Own Object Detection Program</a></b>
+<br/>
+Back | <b><a href="detectnet-console-2.md">Detecting Objects from Images</a></p>
+</b><p align="center"><sup>© 2016-2019 NVIDIA | </sup><a href="../README.md#hello-ai-world"><sup>Table of Contents</sup></a></p>

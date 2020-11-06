@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['googlenet',['GOOGLENET',['../classimageNet.html#a0b7e93af566fe96bfc58cda5f4503470ab013750d9b65eacdae3c587dd42550c0',1,'imageNet']]],
-  ['googlenet_5f12',['GOOGLENET_12',['../classimageNet.html#a0b7e93af566fe96bfc58cda5f4503470af4a7d4831db43dda4de80c2a395f3ebb',1,'imageNet']]]
+  ['ellipse',['Ellipse',['../classglWidget.html#a34532b25a0465161a8f4e591ffc3ad3ca894b67c9e62420331395e399d387cdbc',1,'glWidget']]],
+  ['error',['ERROR',['../classLog.html#afb5d4c945d835d194a295461d752531ea4cd0be82d98ca2a542adc75f2c826e5b',1,'Log']]]
 ];

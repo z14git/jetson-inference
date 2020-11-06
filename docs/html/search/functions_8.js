@@ -1,10 +1,6 @@
 var searchData=
 [
-  ['loadclasscolors',['loadClassColors',['../classsegNet.html#a218a2c71cb4d59476070385c7370f789',1,'segNet']]],
-  ['loadclassinfo',['loadClassInfo',['../classimageNet.html#aeaaa0971ae45b2089aa1b2ed2048032d',1,'imageNet']]],
-  ['loadclasslabels',['loadClassLabels',['../classsegNet.html#a31d2bd6ddf05ce178a8e6c5b88247075',1,'segNet']]],
-  ['loadimagebgr',['loadImageBGR',['../group__util.html#gab0f496972aab71df789fe6ec2da13f5f',1,'loadImage.h']]],
-  ['loadimagergb',['loadImageRGB',['../group__util.html#ga0bf15580a902b216740b467a9f906e98',1,'loadImage.h']]],
-  ['loadimagergba',['loadImageRGBA',['../group__util.html#gac4fec7924987c98f8fbb40176e450e04',1,'loadImage.h']]],
-  ['loadnetwork',['LoadNetwork',['../classtensorNet.html#a905e3152cfcbffe858a9810dcaeecd0c',1,'tensorNet::LoadNetwork(const char *prototxt, const char *model, const char *mean=NULL, const char *input_blob=&quot;data&quot;, const char *output_blob=&quot;prob&quot;, uint32_t maxBatchSize=2)'],['../classtensorNet.html#aa56b82cecf8513198c33090354e458cc',1,'tensorNet::LoadNetwork(const char *prototxt, const char *model, const char *mean, const char *input_blob, const std::vector&lt; std::string &gt; &amp;output_blobs, uint32_t maxBatchSize=2)']]]
+  ['hasbom',['HasBOM',['../classtinyxml2_1_1XMLDocument.html#a33fc5d159db873a179fa26338adb05bd',1,'tinyxml2::XMLDocument']]],
+  ['hasrgb',['HasRGB',['../classcudaPointCloud.html#a0b3b029a6589afe1fbdc20eb2b6d4788',1,'cudaPointCloud']]],
+  ['height',['Height',['../structdetectNet_1_1Detection.html#a2ae87aae76d065e19be1897119daba66',1,'detectNet::Detection::Height() const'],['../structdetectNet_1_1Detection.html#a676289f208f6ad38391117d260414b62',1,'detectNet::Detection::Height(float y1, float y2)'],['../classglWidget.html#a410c337398dd9fc5aa79c19539750642',1,'glWidget::Height()']]]
 ];

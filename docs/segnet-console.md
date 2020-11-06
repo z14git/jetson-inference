@@ -1,11 +1,11 @@
-<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/deep-vision-header.jpg">
-<p align="right"><sup><a href="segnet-patches.md">Back</a> | <a href="../README.md#two-days-to-a-demo-training--inference">Next</a> | </sup><a href="../README.md#two-days-to-a-demo-training--inference"><sup>Contents</sup></a>
+<img src="https://github.com/dusty-nv/jetson-inference/raw/master/docs/images/deep-vision-header.jpg" width="100%">
+<p align="right"><sup><a href="segnet-patches.md">Back</a> | <a href="../README.md#two-days-to-a-demo-digits">Next</a> | </sup><a href="../README.md#two-days-to-a-demo-digits"><sup>Contents</sup></a>
 <br/>
 <sup>Semantic Segmentation</sup></s></p>
 
 # Running Segmentation Models on Jetson
 
-To test a custom segmentation network model snapshot on the Jetson, use the command line interface to [`segnet-console`](../segnet-console/segnet-console.cpp)  
+To test a custom segmentation network model snapshot on the Jetson, use the command line interface to [`segnet-console`](../examples/segnet-console/segnet-console.cpp)  
 
 First, for convienience, set the path to your extracted snapshot into a `$NET` variable:
 
@@ -29,4 +29,4 @@ In addition to the aerial model from this tutorial, the repo also includes pre-t
 
 ##
 <p align="right">Back | <b><a href="segnet-training.md">FCN-Alexnet Patches for TensorRT</a></p>
-</b><p align="center"><sup>© 2016-2019 NVIDIA | </sup><a href="../README.md#two-days-to-a-demo-training--inference"><sup>Table of Contents</sup></a></p>
+</b><p align="center"><sup>© 2016-2019 NVIDIA | </sup><a href="../README.md#two-days-to-a-demo-digits"><sup>Table of Contents</sup></a></p>

@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['screenidx',['screenIdx',['../classglDisplay.html#a987e05d68219418d2d232665d92cc1a2',1,'glDisplay']]],
-  ['size',['size',['../structtensorNet_1_1outputLayer.html#ab5c8d8f6651c9696cf5e4b15e7dc1d80',1,'tensorNet::outputLayer']]]
+  ['height',['height',['../structcudaFont_1_1GlyphInfo.html#adc968847d5a41d8a878c30f183342540',1,'cudaFont::GlyphInfo::height()'],['../structvideoOptions.html#a66660b049937fd088b5ab29a0aa2187c',1,'videoOptions::height()']]]
 ];

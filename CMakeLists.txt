@@ -22,16 +22,26 @@ if( NOT EXISTS "${PROJECT_SOURCE_DIR}/utils/.git" )
 endif()
 
 
-# setup tensorRT flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")	# -std=gnu++11
+# setup build flags
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -Wno-write-strings -Wno-deprecated-declarations")	# -std=c++14 
 set(BUILD_DEPS "YES" CACHE BOOL "If YES, will install dependencies into sandbox.  Automatically reset to NO after dependencies are installed.")
+set(BUILD_INTERACTIVE "YES" CACHE BOOL "If NO, will download/install the default DNN models without prompting the user, and skip installation of PyTorch.")
+set(BUILD_EXPERIMENTAL "NO" CACHE BOOL "If YES, will enable support for experimental DNNs, examples, and plugins")
+
+
+# copy configuration tools to build dir
+file(COPY "tools/download-models.sh" DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY "tools/download-models.rc" DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY "tools/install-pytorch.sh" DESTINATION ${PROJECT_BINARY_DIR})
+file(COPY "tools/install-pytorch.rc" DESTINATION ${PROJECT_BINARY_DIR})
 
 
 # if this is the first time running cmake, perform pre-build dependency install script (or if the user manually triggers re-building the dependencies)
 if( ${BUILD_DEPS} )
 	message("-- Launching pre-build dependency installer script...")
+	message("-- Build interactive:  ${BUILD_INTERACTIVE}")
 
-	execute_process(COMMAND sh ../CMakePreBuild.sh
+	execute_process(COMMAND sh ../CMakePreBuild.sh ${BUILD_INTERACTIVE}
 				WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
 				RESULT_VARIABLE PREBUILD_SCRIPT_RESULT)
 
@@ -41,6 +51,7 @@ endif()
 
 
 # setup CUDA
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/utils/cuda" )
 find_package(CUDA)
 message("-- CUDA version: ${CUDA_VERSION}")
 
@@ -60,12 +71,7 @@ if(CUDA_VERSION_MAJOR GREATER 9)
 		${CUDA_NVCC_FLAGS}; 
 		-gencode arch=compute_72,code=sm_72
 	)
-
-	# OpenCV used for findHomography() and decomposeHomography()
-	# OpenCV version >= 3.0.0 required for decomposeHomography()
-	find_package(OpenCV 3.0.0 COMPONENTS core calib3d REQUIRED)
 endif()
-
 
 # setup project output paths
 set(PROJECT_OUTPUT_DIR  ${PROJECT_BINARY_DIR}/${CMAKE_SYSTEM_PROCESSOR})
@@ -82,67 +88,93 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_OUTPUT_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_OUTPUT_DIR}/lib)
 
 
-# build C/C++ interface
-include_directories(${PROJECT_INCLUDE_DIR} ${GIE_PATH}/include)
+# build C/C++ library
+include_directories(${PROJECT_INCLUDE_DIR} ${PROJECT_INCLUDE_DIR}/jetson-inference ${PROJECT_INCLUDE_DIR}/jetson-utils)
 include_directories(/usr/include/gstreamer-1.0 /usr/lib/aarch64-linux-gnu/gstreamer-1.0/include /usr/include/glib-2.0 /usr/include/libxml2 /usr/lib/aarch64-linux-gnu/glib-2.0/include/)
 
-file(GLOB inferenceSources *.cpp *.cu calibration/*.cpp)
-file(GLOB inferenceIncludes *.h calibration/*.h)
+file(GLOB inferenceSources c/*.cpp c/*.cu calibration/*.cpp)
+file(GLOB inferenceIncludes c/*.h c/*.cuh calibration/*.h)
 
-cuda_add_library(jetson-inference SHARED ${inferenceSources})
-#target_link_libraries(jetson-inference nvcaffe_parser nvinfer)		# gstreamer-0.10 gstbase-0.10 gstapp-0.10 
+if(BUILD_EXPERIMENTAL)
+	message("-- BUILD_EXPERIMENTAL enabled")
+
+	# OpenCV used for findHomography() and decomposeHomography()
+	# OpenCV version >= 3.0.0 required for decomposeHomography()
+	find_package(OpenCV COMPONENTS core calib3d)
+
+	if( NOT OpenCV_FOUND )
+		message("-- didn't find OpenCV on system, disabling OpenCV")
+	else()
+		message("-- OpenCV version:  " ${OpenCV_VERSION})
+
+		if( ${OpenCV_VERSION_MAJOR} LESS 3 )
+			message("-- OpenCV version less than 3.0, disabling OpenCV")
+		else()
+			message("-- OpenCV version >= 3.0.0, enabling OpenCV")
+			set(HAS_OPENCV 1)
+			add_definitions(-DHAS_OPENCV)
+		endif()	
+	endif()
+
+	file(GLOB experimentalSources c/experimental/*.cpp c/experimental/*.cu)
+	file(GLOB experimentalIncludes c/experimental/*.h c/experimental/*.cuh)
+	file(GLOB_RECURSE pluginSources plugins/*.cpp plugins/*.cu)
+
+	list(APPEND inferenceSources ${experimentalSources})
+	list(APPEND inferenceIncludes ${experimentalIncludes})
+else()
+	message("-- BUILD_EXPERIMENTAL disabled")
+	file(GLOB pluginSources plugins/*.cpp plugins/*.cu)
+endif()
+	
+cuda_add_library(jetson-inference SHARED ${inferenceSources} ${pluginSources})
 
 
 # transfer all headers to the include directory
+file(MAKE_DIRECTORY ${PROJECT_INCLUDE_DIR}/jetson-inference)
+
 foreach(include ${inferenceIncludes})
 	message("-- Copying ${include}")
-	configure_file(${include} ${PROJECT_INCLUDE_DIR} COPYONLY)
+	configure_file(${include} ${PROJECT_INCLUDE_DIR}/jetson-inference COPYONLY)
 endforeach()
 
+#if(BUILD_EXPERIMENTAL)
 
-# create symbolic link for network data
+#endif()
+
+# create symbolic link for network and image data
 execute_process( COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${PROJECT_SOURCE_DIR}/data/networks" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/networks" )
+execute_process( COMMAND "${CMAKE_COMMAND}" "-E" "create_symlink" "${PROJECT_SOURCE_DIR}/data/images" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/images" )
+
   
-  
-# copy image data
-file(GLOB imageData ${PROJECT_SOURCE_DIR}/data/images/*)
+# copy image data (EDIT: these are now symlinked above)
+#file(GLOB imageData ${PROJECT_SOURCE_DIR}/data/images/*)
 
-foreach(image ${imageData})
-	message("-- Copying ${image}")
-	file(COPY ${image} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-	#configure_file(${include} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COPYONLY)
-endforeach()
-
-
-# copy tools
-file(COPY "tools/segnet-batch.sh" DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+#foreach(image ${imageData})
+#	message("-- Copying ${image}")
+#	file(COPY ${image} DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+#	#configure_file(${include} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} COPYONLY)
+#endforeach()
 
 
-# build samples & utilities
-add_subdirectory(imagenet-console)
-add_subdirectory(imagenet-camera)
-
-add_subdirectory(detectnet-console)
-add_subdirectory(detectnet-camera)
-
-add_subdirectory(segnet-console)
-add_subdirectory(segnet-camera)
-
-add_subdirectory(trt-bench)
-add_subdirectory(trt-console)
-
+# build subdirectories
 add_subdirectory(docs)
+add_subdirectory(examples)
+add_subdirectory(tools)
 add_subdirectory(utils)
+add_subdirectory(python)
 
-target_link_libraries(jetson-inference jetson-utils nvinfer nvcaffe_parser)
+
+# set linker options
+target_link_libraries(jetson-inference jetson-utils nvinfer nvinfer_plugin nvcaffe_parser)
 
 if(CUDA_VERSION_MAJOR GREATER 9)
-	target_link_libraries(jetson-inference nvonnxparser opencv_core opencv_calib3d)
+	target_link_libraries(jetson-inference nvonnxparser)
 
-	add_subdirectory(homography-console)
-	add_subdirectory(homography-camera)
-
-	add_subdirectory(superres-console)
+    if(HAS_OPENCV) 
+        message("-- Linking jetson-inference with OpenCV " ${OpenCV_VERSION})
+        target_link_libraries(jetson-inference opencv_core opencv_calib3d)
+    endif()
 endif()
 
 
@@ -151,12 +183,16 @@ foreach(include ${inferenceIncludes})
     install(FILES "${include}" DESTINATION include/jetson-inference)
 endforeach()
 
-# install symlink to networks
+# install symlink to networks and images
 install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/data/networks ${CMAKE_INSTALL_PREFIX}/bin/networks )" )
+install(CODE "execute_process( COMMAND ${CMAKE_COMMAND} -E create_symlink ${PROJECT_SOURCE_DIR}/data/images ${CMAKE_INSTALL_PREFIX}/bin/images )" )
 
 # install the shared library
 install(TARGETS jetson-inference DESTINATION lib EXPORT jetson-inferenceConfig)
 
 # install the cmake project, for importing
 install(EXPORT jetson-inferenceConfig DESTINATION share/jetson-inference/cmake)
+
+# run ldconfig after installing
+install(CODE "execute_process( COMMAND ldconfig )")
 
