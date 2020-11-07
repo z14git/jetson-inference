@@ -81,7 +81,7 @@ function attempt_download_file()
 	local filename=$1
 	local URL=$2
 	
-	wget $WGET_QUIET --show-progress --progress=bar:force:noscroll --no-check-certificate $URL -O $filename
+	proxychains4 wget $WGET_QUIET --show-progress --progress=bar:force:noscroll --no-check-certificate $URL -O $filename
 	
 	local wget_status=$?
 
@@ -133,7 +133,7 @@ function attempt_download_archive()
 	local filename=$1
 	local URL=$2
 	
-	wget $WGET_QUIET --show-progress --progress=bar:force:noscroll --no-check-certificate $URL -O $filename
+	proxychains4 wget $WGET_QUIET --show-progress --progress=bar:force:noscroll --no-check-certificate $URL -O $filename
 	
 	local wget_status=$?
 
@@ -798,4 +798,3 @@ while true; do
 
 	exit_message 0
 done
-
